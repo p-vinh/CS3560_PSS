@@ -1,11 +1,7 @@
 public class TransientTask extends Task {
     
     TransientTask(String name, String type, double time, double duration, int date) {
-        this.name = name;
-        this.type = type;
-        this.time = time;
-        this.duration = duration;
-        this.date = date;
+        super(name, type, time, duration, date);
     }
 
     @Override
