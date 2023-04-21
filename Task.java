@@ -1,12 +1,12 @@
 public class Task {
     
-    private String name;
-    private String type;
-    private double time;
-    private double duration;
-    private int date;
+    protected String name;
+    protected String type;
+    protected double time;
+    protected double duration;
+    protected int date;
     
-    private Task(String name, String type, double time, double duration, int date) {
+    public Task(String name, String type, double time, double duration, int date) {
         this.name = name;
         this.type = type;
         this.time = time;
