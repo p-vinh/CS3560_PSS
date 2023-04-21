@@ -10,7 +10,7 @@ public class Model {
 
     void createTask(Task task) {
         tasks.add(task);
-        names.put(task.name, true);
+        names.put(task.getName(), true);
     }
 
     List<Task> getTasks() {

@@ -77,12 +77,15 @@ public class Controller {
 
     public static void creatingTask(Scanner keyboard) {
         Map<String, Boolean> names = model.getNames();
-        String name = "";
-        String type = "";
+        String name;
+        String type;
+        double time;
+        double duration;
+        int date;
+        int endDate;
+        int frequency;
         String input;
         Type taskType;
-        double time = 0, duration = 0;
-        int date = 0, endDate = 0, frequency = 0;
         System.out.println("Creating a task ('-c' anytime to cancel)");
         while (true) {
             System.out.print("Enter name: ");
@@ -91,6 +94,8 @@ public class Controller {
                 System.out.println("------------------------------");
                 System.out.println("Canceled creating a task");
                 return;
+            } else if (name.trim().isEmpty()) {
+                System.out.println("Task name can not be blank");
             } else if (names.containsKey(name)) {
                 System.out.println("Task name must be unique");
             } else {
@@ -99,13 +104,13 @@ public class Controller {
         }
         while (true) {
             try {
-                System.out.print("Enter type ('-info' for available types): ");
+                System.out.print("Enter type ('-t' for available types): ");
                 type = keyboard.nextLine();
                 if (type.equals("-c")) {
                     System.out.println("------------------------------");
                     System.out.println("Canceled creating a task");
                     return;
-                } else if (type.equals("-info")) {
+                } else if (type.equals("-t")) {
                     System.out.println("Available task types: ['Class', 'Study', 'Sleep', 'Exercise', 'Work', 'Meal', 'Visit', 'Shopping', 'Appointment', 'Cancellation']");
                 } else {
                     String formattedType = type.substring(0, 1).toUpperCase() + type.substring(1).toLowerCase();
@@ -125,11 +130,10 @@ public class Controller {
                     System.out.println("Canceled creating a task");
                     return;
                 } else {
-                    if (!input.matches("([01]?\\d|2[0-3])\\.(50|25|0{1,2})")) { // needs to be fixed
+                    if (!input.matches("^(0?[0-9]|1[0-9]|2[0-3])(\\.(0|00|25|5|50|75))?$")) {
                         throw new Exception(input, null);
                     }
                     time = Double.parseDouble(input);
-                    System.out.println("Valid");
                     break;
                 }
             } catch (Exception e) {
@@ -144,8 +148,10 @@ public class Controller {
                     System.out.println("------------------------------");
                     System.out.println("Canceled creating a task");
                     return;
+                } else if (Double.parseDouble(input) == 0) {
+                    throw new Exception(input, null);
                 } else {
-                    if (!input.matches("(0?[1-9]|1\\d|2[0-3])\\.(25|50|75)")) { // needs to be fixed
+                    if (!input.matches("^(0?[0-9]|1[0-9]|2[0-3])(\\.(0|00|25|5|50|75))?$")) {
                         throw new Exception(input, null);
                     }
                     duration = Double.parseDouble(input);
@@ -164,6 +170,7 @@ public class Controller {
                     System.out.println("Canceled creating a task");
                     return;
                 } else {
+                    // needs to check if date is valid
                     date = Integer.parseInt(input);
                     break;
                 }
@@ -172,7 +179,10 @@ public class Controller {
             }
         }
         switch (taskType) {
-            case Class, Study, Sleep, Exercise, Work, Meal -> {model.createTask(new TransientTask(name, type, time, duration, date));}
+            case Class, Study, Sleep, Exercise, Work, Meal -> {
+                // needs to check if there are any overlapping conflicts
+                model.createTask(new TransientTask(name, type, time, duration, date));
+            }
             case Visit, Shopping, Appointment -> {
                 while (true) {
                     try {
@@ -184,6 +194,9 @@ public class Controller {
                             return;
                         } else {
                             endDate = Integer.parseInt(input);
+                            if (date > endDate) { // checks if end date is after start date
+                                throw new Exception(input, null);
+                            }
                             break;
                         }
                     } catch (Exception e) {
@@ -206,6 +219,7 @@ public class Controller {
                         System.out.println("Invalid frequency input");
                     }
                 }
+                // needs to check if there are any overlapping conflicts
                 model.createTask(new RecursiveTask(name, type, time, duration, date, endDate, frequency));
             }
             case Cancellation -> {}
@@ -214,15 +228,15 @@ public class Controller {
     }
 
     public static void viewingTask(Scanner keyboard) {
+        List<Task> taskList = model.getTasks();
         String input;
         Boolean found = false;
         
         System.out.println("Viewing a task");
-        List<Task> taskList = model.getTasks();
         System.out.print("Enter the task name: ");
         input = keyboard.nextLine();
         for (Task task : taskList) {
-            if (task.name.equals(input)) {
+            if (task.getName().equals(input)) {
                 found = true;
                 task.print();
                 break;
@@ -250,9 +264,13 @@ public class Controller {
     }
 
     public static void viewingSchedule(Scanner keyboard) {
-        System.out.println("Viewing a schedule");
+        System.out.println("Viewing schedule");
         List<Task> taskList = model.getTasks();
-        viewer.displaySchedule(taskList);
+        if (taskList.isEmpty()) {
+            System.out.println("No tasks found");
+        } else {
+            viewer.displaySchedule(taskList);
+        }
     }
 
     public static void exiting() {
