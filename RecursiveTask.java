@@ -1,14 +1,10 @@
 public class RecursiveTask extends Task {
 
-    int endDate;
-    int frequency;
+    private int endDate;
+    private int frequency;
 
     RecursiveTask(String name, String type, double time, double duration, int date, int endDate, int frequency) {
-        this.name = name;
-        this.type = type;
-        this.time = time;
-        this.duration = duration;
-        this.date = date;
+        super(name, type, time, duration, date);
         this.endDate = endDate;
         this.frequency = frequency;
     }
