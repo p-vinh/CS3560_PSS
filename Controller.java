@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
@@ -46,7 +47,7 @@ public class Controller {
                     case 5 -> readingScheduleFromFile(keyboard);
                     case 6 -> writingScheduleToFile(keyboard);
                     case 7 -> viewingSchedule(keyboard);
-                    case 8 ->  {
+                    case 8 -> {
                         keyboard.close();
                         exiting();
                     }
@@ -59,7 +60,6 @@ public class Controller {
             }
         }
     }
-
 
     public void creatingTask(Scanner keyboard) {
         Set<String> names = model.getNames();
@@ -97,7 +97,8 @@ public class Controller {
                     System.out.println("Canceled creating a task");
                     return;
                 } else if (type.equals("-t")) {
-                    System.out.println("Available task types: ['Class', 'Study', 'Sleep', 'Exercise', 'Work', 'Meal', 'Visit', 'Shopping', 'Appointment', 'Cancellation']");
+                    System.out.println(
+                            "Available task types: ['Class', 'Study', 'Sleep', 'Exercise', 'Work', 'Meal', 'Visit', 'Shopping', 'Appointment', 'Cancellation']");
                 } else {
                     type = type.substring(0, 1).toUpperCase() + type.substring(1).toLowerCase();
                     taskType = Type.valueOf(type);
@@ -208,8 +209,10 @@ public class Controller {
                 // needs to check if there are any overlapping conflicts
                 model.createTask(new RecursiveTask(name, type, time, duration, date, endDate, frequency));
             }
-            case Cancellation -> {}
-            default -> {}
+            case Cancellation -> {
+            }
+            default -> {
+            }
         }
     }
 
@@ -217,7 +220,7 @@ public class Controller {
         List<Task> taskList = model.getTasks();
         String input;
         Boolean found = false;
-        
+
         System.out.println("Viewing a task");
         System.out.print("Enter the task name: ");
         input = keyboard.nextLine();
@@ -243,10 +246,28 @@ public class Controller {
 
     public void readingScheduleFromFile(Scanner keyboard) {
         System.out.println("Reading a schedule from a file");
+        System.out.println("Enter File Name");
+
+        try {
+            model.readScheduleToFile(keyboard.nextLine());
+        } catch (IOException io) {
+            io.printStackTrace();
+        }
+
+        keyboard.close();
     }
 
     public void writingScheduleToFile(Scanner keyboard) {
         System.out.println("Writing a schedule to a file");
+        System.out.println("Enter Output File Name");
+
+        try {
+            model.writeScheduleToFile(keyboard.nextLine());
+        } catch (IOException io) {
+            io.printStackTrace();
+        }
+
+        keyboard.close();
     }
 
     public void viewingSchedule(Scanner keyboard) {
