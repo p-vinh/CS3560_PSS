@@ -46,7 +46,7 @@ public class Schedule {
         List<Task> schedule = new ArrayList<Task>();
 
         LocalDate startDate = LocalDate.parse(String.valueOf(targetDate), DateTimeFormatter.BASIC_ISO_DATE);
-        LocalDate endOfWeekDate = startDate.plusDays(7);
+        LocalDate endOfWeekDate = startDate.plusDays(6);
         int targetEndDate = Integer.parseInt(endOfWeekDate.format(DateTimeFormatter.BASIC_ISO_DATE));
 
         for (int i = 0; i < tasks.size(); i++) {
