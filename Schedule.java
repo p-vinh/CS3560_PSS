@@ -5,8 +5,13 @@ import java.util.stream.Collectors;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+/** Class that creates a daily, weekly, monthly, or full schedule. */
 public class Schedule {
     
+    /** Creates a daily schedule.
+        @param tasks  List of tasks.
+        @param targetDate  Given date.
+        @return  Sorted list of tasks by time of the given date. */
     public List<Task> dailySchedule(List<Task> tasks, int targetDate) {
         List<Task> schedule = new ArrayList<Task>();
 
@@ -42,6 +47,10 @@ public class Schedule {
                        .collect(Collectors.toList());
     }
 
+    /** Creates a weekly schedule of a given date.
+        @param tasks  List of tasks.
+        @param targetDate  First day of the weekly schedule.
+        @return  Sorted list of tasks by time and day. */
     public List<Task> weeklySchedule(List<Task> tasks, int targetDate) {
         List<Task> schedule = new ArrayList<Task>();
 
@@ -82,6 +91,10 @@ public class Schedule {
                        .collect(Collectors.toList());
     }
 
+    /** Creates a monthly schedule of a given date.
+        @param tasks  List of tasks.
+        @param targetDate  First day of the monthly schedule.
+        @return  Sorted list of tasks by time and day. */
     public List<Task> monthlySchedule(List<Task> tasks, int targetDate) {
         List<Task> schedule = new ArrayList<Task>();
 
@@ -120,6 +133,9 @@ public class Schedule {
                        .collect(Collectors.toList());
     }
 
+    /** Determines the end date of the monthly schedule.
+        @param targetDate  First day of the monthly schedule.
+        @return  End date of the monthly schedule. */
     private int endDateOfMonth(int targetDate) {
         LocalDate startDate = LocalDate.parse(String.valueOf(targetDate), DateTimeFormatter.BASIC_ISO_DATE);
         LocalDate lastDayOfMonth;
@@ -133,6 +149,9 @@ public class Schedule {
         return Integer.parseInt(lastDayOfMonth.format(DateTimeFormatter.BASIC_ISO_DATE));
     }
 
+    /** Creates a full schedule.
+        @param tasks  List of tasks.
+        @return  Sorted list of tasks by time and day. */
     public List<Task> fullSchedule(List<Task> tasks) {
         List<Task> schedule = new ArrayList<Task>();
 
