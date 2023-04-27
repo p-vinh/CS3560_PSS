@@ -25,11 +25,13 @@ public class Viewer {
     public void displayMenu() {
         System.out.println("===== Menu =====\n");
         System.out.println("1) Create Task");
-        System.out.println("2) Edit Task");
-        System.out.println("3) Delete Task");
-        System.out.println("4) Find Task");
+        System.out.println("2) View Task");
+        System.out.println("3) Edit Task");
+        System.out.println("4) Delete Task");
         System.out.println("5) Import Schedule");
         System.out.println("6) Export Schedule");
+        System.out.println("7) View Schedule");
+        System.out.println("8) Quit");
+        System.out.println();
     }
-    
 }
