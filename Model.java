@@ -3,6 +3,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+
 public class Model {
 
     List<Task> tasks = new ArrayList<Task>(); // Stores tasks
@@ -20,4 +25,20 @@ public class Model {
     Map<String, Boolean> getNames() {
         return names;
     }
+
+    public boolean writeScheduleToFile() throws IOException {
+        
+        FileWriter write = new FileWriter(new File("schedule.txt"));
+        StringBuilder sb = new StringBuilder();
+        for (Task task : tasks) {
+
+        }
+        return false;
+    }
+
+    public boolean readScheduleToFile() throws IOException {
+
+        return false;
+    }
+    
 }
