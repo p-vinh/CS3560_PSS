@@ -47,7 +47,7 @@ public class Model {
             json += "{\n\t\t";
             json += "\"Name\": \"" + task.getName() + "\",\n\t\t";
             json += "\"Type\": \"" + task.getType() + "\",\n\t\t";
-            json += "\"Date\": \"" + task.getDate() + "\",\n\t\t";
+            json += "\"Date\": " + task.getDate() + ",\n\t\t";
             json += "\"StartTime\": " + task.getTime() + ",\n\t\t";
             json += "\"Duration\": " + task.getDuration();
             json += "\n\t}";
