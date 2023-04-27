@@ -4,8 +4,8 @@ import java.util.Set;
 
 public class Controller {
 
-    static Model model = new Model();
-    static Viewer viewer = new Viewer();
+    private Model model;
+    private Viewer viewer;
 
     enum Type {
         Class,
@@ -20,16 +20,21 @@ public class Controller {
         Cancellation
     }
 
-    public static void main(String[] args) {
+    public Controller(Model model, Viewer viewer) {
+        this.model = model;
+        this.viewer = viewer;
+    }
+
+    public void menuSelection() {
 
         Scanner keyboard = new Scanner(System.in);
         int action;
 
-        displayTitle();
+        viewer.displayTitle();
 
         while (true) {
             try {
-                displayMenu();
+                viewer.displayMenu();
                 System.out.print("Enter an action (1-8): ");
                 action = keyboard.nextInt();
                 keyboard.nextLine();
@@ -55,27 +60,8 @@ public class Controller {
         }
     }
 
-    public static void displayTitle() {
-        System.out.println(" ___  ___ ___ ");
-        System.out.println("| _ \\/ __/ __|");
-        System.out.println("|  _/\\__ \\__ \\");
-        System.out.println("|_|  |___/___/\n");
-    }
 
-    public static void displayMenu() {
-        System.out.println("------------------------------");
-        System.out.println("1) Create a task");
-        System.out.println("2) View a task");
-        System.out.println("3) Edit a task");
-        System.out.println("4) Delete a task");
-        System.out.println("5) Read schedule from a file");
-        System.out.println("6) Write schedule to a file");
-        System.out.println("7) View schedule");
-        System.out.println("8) Exit session");
-        System.out.println("------------------------------");
-    }
-
-    public static void creatingTask(Scanner keyboard) {
+    public void creatingTask(Scanner keyboard) {
         Set<String> names = model.getNames();
         String name;
         String type;
@@ -227,7 +213,7 @@ public class Controller {
         }
     }
 
-    public static void viewingTask(Scanner keyboard) {
+    public void viewingTask(Scanner keyboard) {
         List<Task> taskList = model.getTasks();
         String input;
         Boolean found = false;
@@ -247,23 +233,23 @@ public class Controller {
         }
     }
 
-    public static void editingTask(Scanner keyboard) {
+    public void editingTask(Scanner keyboard) {
         System.out.println("Editing a task");
     }
 
-    public static void deletingTask(Scanner keyboard) {
+    public void deletingTask(Scanner keyboard) {
         System.out.println("Deleting a task");
     }
 
-    public static void readingScheduleFromFile(Scanner keyboard) {
+    public void readingScheduleFromFile(Scanner keyboard) {
         System.out.println("Reading a schedule from a file");
     }
 
-    public static void writingScheduleToFile(Scanner keyboard) {
+    public void writingScheduleToFile(Scanner keyboard) {
         System.out.println("Writing a schedule to a file");
     }
 
-    public static void viewingSchedule(Scanner keyboard) {
+    public void viewingSchedule(Scanner keyboard) {
         System.out.println("Viewing schedule");
         List<Task> taskList = model.getTasks();
         if (taskList.isEmpty()) {
@@ -273,7 +259,7 @@ public class Controller {
         }
     }
 
-    public static void exiting() {
+    public void exiting() {
         System.out.println("Exiting..");
         System.exit(1);
     }
