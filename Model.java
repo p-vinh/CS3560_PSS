@@ -1,7 +1,9 @@
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -10,35 +12,63 @@ import java.io.IOException;
 
 public class Model {
 
-    List<Task> tasks = new ArrayList<Task>(); // Stores tasks
-    Map<String, Boolean> names = new HashMap<>(); // Stores unique task names
+    private List<Task> tasks = new ArrayList<Task>(); // Stores tasks
+    private Set<String> names = new HashSet<>(); // Stores unique task names
+    private Schedule schedular = new Schedule();
 
-    void createTask(Task task) {
+    public void createTask(Task task) {
         tasks.add(task);
-        names.put(task.getName(), true);
+        names.add(task.getName());
     }
 
-    List<Task> getTasks() {
+    public List<Task> getTasks() {
         return tasks;
     }
 
-    Map<String, Boolean> getNames() {
+    public Set<String> getNames() {
         return names;
     }
 
-    public boolean writeScheduleToFile() throws IOException {
-        
-        FileWriter write = new FileWriter(new File("schedule.txt"));
-        StringBuilder sb = new StringBuilder();
-        for (Task task : tasks) {
+    public List<Task> getDailySchedule(int date) {
+        return schedular.dailySchedule(tasks, date);
+    }
 
+    public List<Task> getWeeklySchedule(int date) {
+        return schedular.weeklySchedule(tasks, date);
+    }
+
+    public List<Task> getMonthlySchedule(int date) {
+        return schedular.monthlySchedule(tasks, date);
+    }
+
+    public List<Task> getFullSchedule() {
+        return schedular.fullSchedule(tasks);
+    }
+
+    public void writeScheduleToFile(List<Task> schedule, String fileName) {
+        String json = "[\n\t";
+        for (int i = 0; i < schedule.size(); i++) {
+            Task task = schedule.get(i);
+            json += "{\n\t\t";
+            json += "\"Name\": \"" + task.getName() + "\",\n\t\t";
+            json += "\"Type\": \"" + task.getType() + "\",\n\t\t";
+            json += "\"Date\": " + task.getDate() + ",\n\t\t";
+            json += "\"StartTime\": " + task.getTime() + ",\n\t\t";
+            json += "\"Duration\": " + task.getDuration();
+            json += "\n\t}";
+            if (i < tasks.size() - 1) {
+                json += ",\n\t";
+            }
         }
-        return false;
-    }
+        json += "\n]";
 
-    public boolean readScheduleToFile() throws IOException {
-
-        return false;
+        try {
+            FileWriter writer = new FileWriter(fileName + ".json");
+            writer.write(json);
+            writer.close();
+            System.out.println("Successfully wrote schedule to " + fileName + ".json");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-    
 }

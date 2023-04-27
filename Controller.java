@@ -1,6 +1,6 @@
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 public class Controller {
 
@@ -76,7 +76,7 @@ public class Controller {
     }
 
     public static void creatingTask(Scanner keyboard) {
-        Map<String, Boolean> names = model.getNames();
+        Set<String> names = model.getNames();
         String name;
         String type;
         double time;
@@ -96,7 +96,7 @@ public class Controller {
                 return;
             } else if (name.trim().isEmpty()) {
                 System.out.println("Task name can not be blank");
-            } else if (names.containsKey(name)) {
+            } else if (names.contains(name)) {
                 System.out.println("Task name must be unique");
             } else {
                 break;
@@ -113,8 +113,8 @@ public class Controller {
                 } else if (type.equals("-t")) {
                     System.out.println("Available task types: ['Class', 'Study', 'Sleep', 'Exercise', 'Work', 'Meal', 'Visit', 'Shopping', 'Appointment', 'Cancellation']");
                 } else {
-                    String formattedType = type.substring(0, 1).toUpperCase() + type.substring(1).toLowerCase();
-                    taskType = Type.valueOf(formattedType);
+                    type = type.substring(0, 1).toUpperCase() + type.substring(1).toLowerCase();
+                    taskType = Type.valueOf(type);
                     break;
                 }
             } catch (Exception e) {
