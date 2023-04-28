@@ -45,30 +45,34 @@ public class Model {
         return schedular.fullSchedule(tasks);
     }
 
-    public void writeScheduleToFile(List<Task> schedule, String fileName) {
-        String json = "[\n\t";
-        for (int i = 0; i < schedule.size(); i++) {
-            Task task = schedule.get(i);
-            json += "{\n\t\t";
-            json += "\"Name\": \"" + task.getName() + "\",\n\t\t";
-            json += "\"Type\": \"" + task.getType() + "\",\n\t\t";
-            json += "\"Date\": " + task.getDate() + ",\n\t\t";
-            json += "\"StartTime\": " + task.getTime() + ",\n\t\t";
-            json += "\"Duration\": " + task.getDuration();
-            json += "\n\t}";
+    public void writeScheduleToFile(String fileName) throws IOException {
+        StringBuilder sb = new StringBuilder("[\n\t");
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            sb.append("{\n\t\t"
+            + "\"Name\": \"" + task.getName() + "\",\n\t\t"
+            + "\"Type\": \"" + task.getType() + "\",\n\t\t"
+            + "\"Date\": " + task.getDate() + ",\n\t\t"
+            + "\"StartTime\": " + task.getTime() + ",\n\t\t"
+            + "\"Duration\": " + task.getDuration()
+            + "\n\t}");
             if (i < tasks.size() - 1) {
-                json += ",\n\t";
+                sb.append(",\n\t");
             }
         }
-        json += "\n]";
+        sb.append("\n]");
 
         try {
-            FileWriter writer = new FileWriter(fileName + ".json");
-            writer.write(json);
+            FileWriter writer = new FileWriter(new File(fileName + ".json"));
+            writer.write(sb.toString());
             writer.close();
             System.out.println("Successfully wrote schedule to " + fileName + ".json");
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void readScheduleToFile(String fileName) throws IOException {
+
     }
 }
