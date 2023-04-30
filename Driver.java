@@ -1,9 +1,9 @@
+/** Drive class for running the PSS */
 public class Driver {
     public static void main(String[] args) {
-        Viewer viewer = new Viewer();
         Model model = new Model();
+        Viewer viewer = new Viewer();
         Controller controller = new Controller(model, viewer);
         controller.menuSelection();
-
     }
 }

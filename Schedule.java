@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 /** Class that creates a daily, weekly, monthly, or full schedule. */
 public class Schedule {
     
-    /** Creates a daily schedule.
+    /** Creates a daily schedule of a given date.
         @param tasks  List of tasks.
         @param targetDate  Given date.
         @return  Sorted list of tasks by time of the given date. */
@@ -20,16 +20,16 @@ public class Schedule {
             if (task.getDate() == targetDate) {
                 if (task.getClass() == TransientTask.class) {
                     schedule.add(task);
-                } else if (task.getClass() == RecursiveTask.class) {
+                } else if (task.getClass() == RecurringTask.class) {
                     int date = task.getDate();
-                    double startTime = task.getTime();
+                    double startTime = task.getStartTime();
                     double duration = task.getDuration();
                     boolean antiTaskFound = false;
                     for (int j = i + 1; j < tasks.size(); j++) {
                         Task potentialAntiTask = tasks.get(j);
                         if (potentialAntiTask.getClass() == AntiTask.class
                                 && potentialAntiTask.getDate() == date
-                                && potentialAntiTask.getTime() == startTime
+                                && potentialAntiTask.getStartTime() == startTime
                                 && potentialAntiTask.getDuration() == duration) {
                             antiTaskFound = true;
                             break;
@@ -43,7 +43,7 @@ public class Schedule {
         }
 
         return schedule.stream()
-                       .sorted(Comparator.comparing(Task::getTime))
+                       .sorted(Comparator.comparing(Task::getStartTime))
                        .collect(Collectors.toList());
     }
 
@@ -63,16 +63,16 @@ public class Schedule {
             if (task.getDate() >= targetDate && task.getDate() <= targetEndDate) {
                 if (task.getClass() == TransientTask.class) {
                     schedule.add(task);
-                } else if (task.getClass() == RecursiveTask.class) {
+                } else if (task.getClass() == RecurringTask.class) {
                     int date = task.getDate();
-                    double startTime = task.getTime();
+                    double startTime = task.getStartTime();
                     double duration = task.getDuration();
                     boolean antiTaskFound = false;
                     for (int j = i + 1; j < tasks.size(); j++) {
                         Task potentialAntiTask = tasks.get(j);
                         if (potentialAntiTask.getClass() == AntiTask.class
                                 && potentialAntiTask.getDate() == date
-                                && potentialAntiTask.getTime() == startTime
+                                && potentialAntiTask.getStartTime() == startTime
                                 && potentialAntiTask.getDuration() == duration) {
                             antiTaskFound = true;
                             break;
@@ -86,7 +86,7 @@ public class Schedule {
         }
 
         return schedule.stream()
-                       .sorted(Comparator.comparing(Task::getTime))
+                       .sorted(Comparator.comparing(Task::getStartTime))
                        .sorted(Comparator.comparing(Task::getDate))
                        .collect(Collectors.toList());
     }
@@ -105,16 +105,16 @@ public class Schedule {
             if (task.getDate() >= targetDate && task.getDate() <= targetEndDate) {
                 if (task.getClass() == TransientTask.class) {
                     schedule.add(task);
-                } else if (task.getClass() == RecursiveTask.class) {
+                } else if (task.getClass() == RecurringTask.class) {
                     int date = task.getDate();
-                    double startTime = task.getTime();
+                    double startTime = task.getStartTime();
                     double duration = task.getDuration();
                     boolean antiTaskFound = false;
                     for (int j = i + 1; j < tasks.size(); j++) {
                         Task potentialAntiTask = tasks.get(j);
                         if (potentialAntiTask.getClass() == AntiTask.class
                                 && potentialAntiTask.getDate() == date
-                                && potentialAntiTask.getTime() == startTime
+                                && potentialAntiTask.getStartTime() == startTime
                                 && potentialAntiTask.getDuration() == duration) {
                             antiTaskFound = true;
                             break;
@@ -128,7 +128,7 @@ public class Schedule {
         }
 
         return schedule.stream()
-                       .sorted(Comparator.comparing(Task::getTime))
+                       .sorted(Comparator.comparing(Task::getStartTime))
                        .sorted(Comparator.comparing(Task::getDate))
                        .collect(Collectors.toList());
     }
@@ -159,16 +159,16 @@ public class Schedule {
             Task task = tasks.get(i);
             if (task.getClass() == TransientTask.class) {
                 schedule.add(task);
-            } else if (task.getClass() == RecursiveTask.class) {
+            } else if (task.getClass() == RecurringTask.class) {
                 int date = task.getDate();
-                double startTime = task.getTime();
+                double startTime = task.getStartTime();
                 double duration = task.getDuration();
                 boolean antiTaskFound = false;
                 for (int j = i + 1; j < tasks.size(); j++) {
                     Task potentialAntiTask = tasks.get(j);
                     if (potentialAntiTask.getClass() == AntiTask.class
                             && potentialAntiTask.getDate() == date
-                            && potentialAntiTask.getTime() == startTime
+                            && potentialAntiTask.getStartTime() == startTime
                             && potentialAntiTask.getDuration() == duration) {
                         antiTaskFound = true;
                         break;
@@ -181,7 +181,7 @@ public class Schedule {
         }
 
         return schedule.stream()
-                       .sorted(Comparator.comparing(Task::getTime))
+                       .sorted(Comparator.comparing(Task::getStartTime))
                        .sorted(Comparator.comparing(Task::getDate))
                        .collect(Collectors.toList());
     }
