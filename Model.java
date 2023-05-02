@@ -1,10 +1,8 @@
-<<<<<<< HEAD
-import java.util.*;
-import java.io.*;
-=======
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,38 +11,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
->>>>>>> 383a533478c344f49e83475301b607d0fa2adc48
 
 public class Model {
-    Scanner scnr = new Scanner(System.in);
-    List<Task> listOfTasks = new ArrayList<Task>(); // Stores tasks
-    Map<String, Boolean> taskName = new HashMap<>(); // Stores unique task names
-    
-    int numInput;
 
-<<<<<<< HEAD
-    void displayTaskOptions(){
-        System.out.println("Choose a task");
-        System.out.println("1. Transient Task");
-        System.out.println("2. Recurring Task");
-        System.out.println("3. Anti-task");
-    }
-
-    
-    void createTask(Task task) {
-        listOfTasks.add(task);
-        taskName.put(task.getName(), true);
-    }
-
-    List<Task> getTasks() {
-        return listOfTasks;
-    }
-
-    Map<String, Boolean> getNames() {
-        return taskName;
-    }
-    
-=======
     private List<Task> tasks = new ArrayList<Task>(); // Stores tasks
     private Set<String> names = new HashSet<>(); // Stores unique task names
     private Schedule schedular = new Schedule();
@@ -52,6 +21,7 @@ public class Model {
     public void createTask(Task task) {
         tasks.add(task);
         names.add(task.getName());
+        Collections.sort(tasks);
     }
 
     public List<Task> getTasks() {
@@ -108,5 +78,4 @@ public class Model {
     public void readScheduleToFile(String fileName) throws IOException {
 
     }
->>>>>>> 383a533478c344f49e83475301b607d0fa2adc48
 }

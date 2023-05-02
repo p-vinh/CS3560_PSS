@@ -1,4 +1,4 @@
-public class Task {
+public class Task implements Comparable<Task>{
     
     protected String name;
     protected String type;
@@ -57,4 +57,18 @@ public class Task {
     public int getDate() {
         return date;
     }
+
+    
+    public int compareTo(Task task){
+        int result = Integer.valueOf(date).compareTo(task.date);
+        if (result == 0){
+            return Double.valueOf(time).compareTo(task.time);
+        }
+        else{
+            return result;
+        }
+    }
+    
+
+    
 }
