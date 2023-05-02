@@ -1,23 +1,32 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.io.*;
 
 public class Model {
+    Scanner scnr = new Scanner(System.in);
+    List<Task> listOfTasks = new ArrayList<Task>(); // Stores tasks
+    Map<String, Boolean> taskName = new HashMap<>(); // Stores unique task names
+    
+    int numInput;
 
-    List<Task> tasks = new ArrayList<Task>(); // Stores tasks
-    Map<String, Boolean> names = new HashMap<>(); // Stores unique task names
+    void displayTaskOptions(){
+        System.out.println("Choose a task");
+        System.out.println("1. Transient Task");
+        System.out.println("2. Recurring Task");
+        System.out.println("3. Anti-task");
+    }
 
+    
     void createTask(Task task) {
-        tasks.add(task);
-        names.put(task.getName(), true);
+        listOfTasks.add(task);
+        taskName.put(task.getName(), true);
     }
 
     List<Task> getTasks() {
-        return tasks;
+        return listOfTasks;
     }
 
     Map<String, Boolean> getNames() {
-        return names;
+        return taskName;
     }
+    
 }
