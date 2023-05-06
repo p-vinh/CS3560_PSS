@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 /** Class that creates a daily, weekly, monthly, or full schedule. */
-public class Schedule {
+public class Scheduler {
     
     /** Creates a daily schedule of a given date.
         @param tasks  List of tasks.
@@ -141,7 +141,7 @@ public class Schedule {
         LocalDate lastDayOfMonth;
         if (startDate.getDayOfMonth() == 1) {
             lastDayOfMonth = startDate.withDayOfMonth(startDate.lengthOfMonth());
-        } else if (startDate.getDayOfMonth() == startDate.lengthOfMonth() && startDate.lengthOfMonth() > startDate.plusMonths(1).lengthOfMonth()) {
+        } else if (startDate.getDayOfMonth() > startDate.plusMonths(1).lengthOfMonth()) {
             lastDayOfMonth = startDate.plusMonths(1);
         } else {
             lastDayOfMonth = startDate.plusMonths(1).minusDays(1);

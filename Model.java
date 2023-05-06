@@ -1,8 +1,6 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -18,7 +16,8 @@ public class Model {
 
     private List<Task> tasks = new ArrayList<Task>(); // Stores tasks
     private Set<String> names = new HashSet<String>(); // Stores unique task names
-    private Schedule schedular = new Schedule(); // Schedular for creating a schedule
+    private Scheduler scheduler = new Scheduler(); // Scheduler for creating a schedule
+    private Calendar calendar = new Calendar(); // Calendar for checking dates and overlaps
 
     private boolean isUpdating = false; // Flag for a task being edited
     private boolean isReading = false; // Flag for a file holding a schedule being read
@@ -50,7 +49,7 @@ public class Model {
             }
             for (int i = 0; i < tasks.size(); i++) {
                 Task potentialOverlappingTask = tasks.get(i);
-                if (checkOverlap(task, potentialOverlappingTask) && potentialOverlappingTask.getClass() == TransientTask.class) {
+                if (calendar.checkOverlap(task, potentialOverlappingTask) && potentialOverlappingTask.getClass() == TransientTask.class) {
                     System.out.println("------------------------------");
                     if (isReading) {
                         System.out.println("Error: Failed to read file due to an overlapping conflict with task: \"" + potentialOverlappingTask.getName() + "\"");
@@ -60,7 +59,7 @@ public class Model {
                         System.out.println("Error: Failed to create task due to an overlapping conflict with task: \"" + potentialOverlappingTask.getName() + "\"");
                     }
                     return false;
-                } else if (checkOverlap(task, potentialOverlappingTask) && potentialOverlappingTask.getClass() == RecurringTask.class) {
+                } else if (calendar.checkOverlap(task, potentialOverlappingTask) && potentialOverlappingTask.getClass() == RecurringTask.class) {
                     int date = potentialOverlappingTask.getDate();
                     double time = potentialOverlappingTask.getStartTime();
                     double duration = potentialOverlappingTask.getDuration();
@@ -121,7 +120,7 @@ public class Model {
             for (int date = recurringTask.getDate(); date <= recurringTask.getEndDate();) {
                 for (int i = 0; i < tasks.size(); i++) {
                     Task potentialOverlappingTask = tasks.get(i);
-                    if (checkOverlap(new RecurringTask(recurringTask.getName(), recurringTask.getType(), recurringTask.getStartTime(), recurringTask.getDuration(), date, recurringTask.getEndDate(), recurringTask.getFrequency()), potentialOverlappingTask) && potentialOverlappingTask.getClass() == TransientTask.class) {
+                    if (calendar.checkOverlap(new RecurringTask(recurringTask.getName(), recurringTask.getType(), recurringTask.getStartTime(), recurringTask.getDuration(), date, recurringTask.getEndDate(), recurringTask.getFrequency()), potentialOverlappingTask) && potentialOverlappingTask.getClass() == TransientTask.class) {
                         System.out.println("------------------------------");
                         if (isReading) {
                             System.out.println("Error: Failed to read file due to an overlapping conflict with task: \"" + potentialOverlappingTask.getName() + "\"");
@@ -131,7 +130,7 @@ public class Model {
                             System.out.println("Error: Failed to create task due to an overlapping conflict with task: \"" + potentialOverlappingTask.getName() + "\"");
                         }
                         return false;
-                    } else if (checkOverlap(new RecurringTask(recurringTask.getName(), recurringTask.getType(), recurringTask.getStartTime(), recurringTask.getDuration(), date, recurringTask.getEndDate(), recurringTask.getFrequency()), potentialOverlappingTask) && potentialOverlappingTask.getClass() == RecurringTask.class) {
+                    } else if (calendar.checkOverlap(new RecurringTask(recurringTask.getName(), recurringTask.getType(), recurringTask.getStartTime(), recurringTask.getDuration(), date, recurringTask.getEndDate(), recurringTask.getFrequency()), potentialOverlappingTask) && potentialOverlappingTask.getClass() == RecurringTask.class) {
                         int day = potentialOverlappingTask.getDate();
                         double time = potentialOverlappingTask.getStartTime();
                         double duration = potentialOverlappingTask.getDuration();
@@ -308,22 +307,133 @@ public class Model {
                     for (Task task : tasks) {
                         backup.add(task);
                     }
-                    isUpdating = true;
-                    boolean deleted = deleteTask(oldTask.getName());
-                    if (deleted) {
-                        boolean created = createTask(newTask);
-                        if (created) {
-                            isUpdating = false;
-                            return true;
-                        } else {
-                            tasks = new ArrayList<Task>(); // If update fails, restore tasks and names
-                            names = new HashSet<String>();
-                            for (Task task : backup) {
-                                tasks.add(task);
-                                names.add(task.getName());
+                    List<Task> antiTasksList = new ArrayList<Task>(); // Stores any associated antitasks about to be deleted
+                    List<Task> moveTasksList = new ArrayList<Task>(); // Moves any tasks created after the old recurring task to after the new recurring task to keep order of creation
+                    for (int i = 0; i < tasks.size(); i++) {
+                        Task task = tasks.get(i);
+                        if (task.getName().equals(oldRecurringTask.getName())) {
+                            for (int j = i; j < tasks.size(); j++) {
+                                Task potentialRecurringTask = tasks.get(j);
+                                if (potentialRecurringTask.getName().equals(oldRecurringTask.getName())) {
+                                    int date = potentialRecurringTask.getDate();
+                                    double startTime = potentialRecurringTask.getStartTime();
+                                    double duration = potentialRecurringTask.getDuration();
+                                    for (int k = j + 1; k < tasks.size(); k++) {
+                                        Task potentialAntiTask = tasks.get(k);
+                                        if (potentialAntiTask.getClass() == AntiTask.class
+                                                && potentialAntiTask.getDate() == date
+                                                && potentialAntiTask.getStartTime() == startTime
+                                                && potentialAntiTask.getDuration() == duration) {
+                                            tasks.remove(potentialAntiTask); // Remove any matching antitask
+                                            names.remove(potentialAntiTask.getName());
+                                            antiTasksList.add(potentialAntiTask); // Store the antitask in case an instance of the new recurring task matches
+                                            break;
+                                        }
+                                    }
+                                    tasks.remove(potentialRecurringTask); // Remove any recurring task instance
+                                    j--; // Decrement j to account for removed task
+                                } else {
+                                    moveTasksList.add(tasks.get(j));
+                                    tasks.remove(tasks.get(j));
+                                    j--;
+                                }
+                            }
+                            names.remove(oldRecurringTask.getName());
+                        }
+                    }
+                    for (int date = newRecurringTask.getDate(); date <= newRecurringTask.getEndDate();) {
+                        for (int i = 0; i < tasks.size(); i++) {
+                            Task potentialOverlappingTask = tasks.get(i);
+                            if (calendar.checkOverlap(new RecurringTask(newRecurringTask.getName(), newRecurringTask.getType(), newRecurringTask.getStartTime(), newRecurringTask.getDuration(), date, newRecurringTask.getEndDate(), newRecurringTask.getFrequency()), potentialOverlappingTask) && potentialOverlappingTask.getClass() == TransientTask.class) {
+                                int day = newRecurringTask.getDate();
+                                double time = newRecurringTask.getStartTime();
+                                double duration = newRecurringTask.getDuration();
+                                boolean antiTaskFound = false;
+                                for (int j = 0; j < antiTasksList.size(); j++) {
+                                    if (antiTasksList.get(j).getDate() == day && antiTasksList.get(j).getStartTime() == time && antiTasksList.get(j).getDuration() == duration) {
+                                        antiTaskFound = true;
+                                        break;
+                                    }
+                                }
+                                if (!antiTaskFound) {
+                                    System.out.println("------------------------------");
+                                    System.out.println("Error: Failed to update task due to an overlapping conflict with task: \"" + potentialOverlappingTask.getName() + "\"");
+                                    tasks = new ArrayList<Task>(); // If update fails, restore tasks and names
+                                    names = new HashSet<String>();
+                                    for (Task task : backup) {
+                                        tasks.add(task);
+                                        names.add(task.getName());
+                                    }
+                                    isUpdating = false;
+                                    return false;
+                                }
+                            } else if (calendar.checkOverlap(new RecurringTask(newRecurringTask.getName(), newRecurringTask.getType(), newRecurringTask.getStartTime(), newRecurringTask.getDuration(), date, newRecurringTask.getEndDate(), newRecurringTask.getFrequency()), potentialOverlappingTask) && potentialOverlappingTask.getClass() == RecurringTask.class) {
+                                int day = newRecurringTask.getDate();
+                                double time = newRecurringTask.getStartTime();
+                                double duration = newRecurringTask.getDuration();
+                                boolean antiTaskFound = false;
+                                for (int j = 0; j < antiTasksList.size(); j++) {
+                                    if (antiTasksList.get(j).getDate() == day && antiTasksList.get(j).getStartTime() == time && antiTasksList.get(j).getDuration() == duration) {
+                                        antiTaskFound = true;
+                                        break;
+                                    }
+                                }
+                                if (antiTaskFound) {
+                                   continue;
+                                }
+                                day = potentialOverlappingTask.getDate();
+                                time = potentialOverlappingTask.getStartTime();
+                                duration = potentialOverlappingTask.getDuration();
+                                antiTaskFound = false;
+                                for (int j = i + 1; j < tasks.size(); j++) {
+                                    if (tasks.get(j).getClass() == AntiTask.class) {
+                                        Task antiTask = tasks.get(j);
+                                        if (antiTask.getDate() == day && antiTask.getStartTime() == time && antiTask.getDuration() == duration) {
+                                            antiTaskFound = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!antiTaskFound) {
+                                    System.out.println("------------------------------");
+                                    System.out.println("Error: Failed to update task due to an overlapping conflict with task: \"" + potentialOverlappingTask.getName() + "\"");
+                                    tasks = new ArrayList<Task>(); // If update fails, restore tasks and names
+                                    names = new HashSet<String>();
+                                    for (Task task : backup) {
+                                        tasks.add(task);
+                                        names.add(task.getName());
+                                    }
+                                    isUpdating = false;
+                                    return false;
+                                }
+                            }
+                        }
+                        LocalDate currentDate = LocalDate.parse(String.valueOf(date), DateTimeFormatter.BASIC_ISO_DATE);
+                        LocalDate nextDate = currentDate.plusDays(newRecurringTask.getFrequency());
+                        date = Integer.parseInt(nextDate.format(DateTimeFormatter.BASIC_ISO_DATE));
+                    }
+                    for (int date = newRecurringTask.getDate(); date <= newRecurringTask.getEndDate();) {
+                        tasks.add(new RecurringTask(newRecurringTask.getName(), newRecurringTask.getType(), newRecurringTask.getStartTime(), newRecurringTask.getDuration(), date, newRecurringTask.getEndDate(), newRecurringTask.getFrequency()));
+                        LocalDate currentDate = LocalDate.parse(String.valueOf(date), DateTimeFormatter.BASIC_ISO_DATE);
+                        LocalDate nextDate = currentDate.plusDays(newRecurringTask.getFrequency());
+                        date = Integer.parseInt(nextDate.format(DateTimeFormatter.BASIC_ISO_DATE));
+                    }
+                    names.add(newRecurringTask.getName());
+                    for (Task antiTask : antiTasksList) {
+                        for (int i = 0; i < tasks.size(); i++) {
+                            if (antiTask.getDate() == tasks.get(i).getDate() && antiTask.getStartTime() == tasks.get(i).getStartTime() && antiTask.getDuration() == tasks.get(i).getDuration()) {
+                                tasks.add(antiTask); // Add antitask back if it matches an instance of the new recurring task
+                                names.add(antiTask.getName());
+                                break;
                             }
                         }
                     }
+                    for (Task task : moveTasksList) {
+                        tasks.add(task); // Add tasks back to the end of the list
+                    }
+                    System.out.println("------------------------------");
+                    System.out.println("Successfully updated task(s)");
+                    return true;
                 }
             }
         } else {
@@ -417,7 +527,7 @@ public class Model {
                                             break;
                                         } else {
                                             for (int l = k + 1; l < tasks.size(); l++) {
-                                                if (checkOverlap(recurringTask, tasks.get(l)) && tasks.get(l).getClass() == TransientTask.class) {
+                                                if (calendar.checkOverlap(recurringTask, tasks.get(l)) && tasks.get(l).getClass() == TransientTask.class) {
                                                     System.out.println("------------------------------");
                                                     if (!isUpdating) {
                                                         System.out.println("Error: Failed to delete cancellation task, the tasks: \"" + recurringTask.getName() + "\" and \"" + tasks.get(l).getName() + "\" have overlapping conflicts");
@@ -425,7 +535,7 @@ public class Model {
                                                         System.out.println("Error: Failed to update task, the tasks: \"" + recurringTask.getName() + "\" and \"" + tasks.get(l).getName() + "\" have overlapping conflicts");
                                                     }
                                                     return false;
-                                                } else if (checkOverlap(recurringTask, tasks.get(l)) && tasks.get(l).getClass() == RecurringTask.class) {
+                                                } else if (calendar.checkOverlap(recurringTask, tasks.get(l)) && tasks.get(l).getClass() == RecurringTask.class) {
                                                     boolean antiTaskFound = false;
                                                     for (int m = l + 1; m < tasks.size(); m++) {
                                                         if (tasks.get(m).getClass() == AntiTask.class
@@ -482,27 +592,27 @@ public class Model {
         @param  date The given date
         @return  Daily schedule. */
     public List<Task> getDailySchedule(int date) {
-        return schedular.dailySchedule(tasks, date);
+        return scheduler.dailySchedule(tasks, date);
     }
 
     /** Requests a weekly schedule of a given date.
         @param  date First day of the weekly schedule
         @return  Weekly schedule. */
     public List<Task> getWeeklySchedule(int date) {
-        return schedular.weeklySchedule(tasks, date);
+        return scheduler.weeklySchedule(tasks, date);
     }
 
     /** Requests a monthly schedule of a given date.
         @param  date First day of the monthly schedule
         @return  Monthly schedule. */
     public List<Task> getMonthlySchedule(int date) {
-        return schedular.monthlySchedule(tasks, date);
+        return scheduler.monthlySchedule(tasks, date);
     }
 
     /** Requests a full schedule.
         @return  Full schedule. */
     public List<Task> getFullSchedule() {
-        return schedular.fullSchedule(tasks);
+        return scheduler.fullSchedule(tasks);
     }
 
     /** Writes a schedule to a file.
@@ -588,7 +698,7 @@ public class Model {
                 // Check which type of task the JSON object represents by type
                 if (type.equals("Visit") || type.equals("Shopping") || type.equals("Appointment")) {
                     Integer date = extractInt(json, "Date");
-                    if (!isValidDate(date)) {
+                    if (!calendar.isValidDate(date)) {
                         throw new IllegalArgumentException("Error: File contains task \"" + name + "\" with an invalid date: " + date.toString());
                     }
                     created = createTask(new TransientTask(name, type, startTime, duration, date));
@@ -600,10 +710,10 @@ public class Model {
                     Integer startDate = extractInt(json, "StartDate");
                     Integer endDate = extractInt(json, "EndDate");
                     Integer frequency = extractInt(json, "Frequency");
-                    if (!isValidDate(startDate)) {
+                    if (!calendar.isValidDate(startDate)) {
                         throw new IllegalArgumentException("Error: File contains task \"" + name + "\" with an invalid start date: " + startDate.toString());
                     }
-                    if (!isValidDate(endDate)) {
+                    if (!calendar.isValidDate(endDate)) {
                         throw new IllegalArgumentException("Error: File contains task \"" + name + "\" with an invalid end date: " + endDate.toString());
                     }
                     if (startDate > endDate) {
@@ -618,7 +728,7 @@ public class Model {
                     }
                 } else if (type.equals("Cancellation") ){
                     Integer date = extractInt(json, "Date");
-                    if (!isValidDate(date)) {
+                    if (!calendar.isValidDate(date)) {
                         throw new IllegalArgumentException("Error: File contains task \"" + name + "\" with an invalid date: " + date.toString());
                     }
                     created = createTask(new AntiTask(name, type, startTime, duration, date));
@@ -684,76 +794,4 @@ public class Model {
         matcher.find();
         return Integer.parseInt(matcher.group(1));
     }
-
-    /** Checks if the two given tasks overlap by time and day.
-        @param  firstTask The first task.
-        @param  secondTask The second task.
-        @return  True if the two tasks overlap, false otherwise. */
-    private boolean checkOverlap(Task firstTask, Task secondTask) {
-        int firstTaskEndDate = firstTask.getDate();
-        int secondTaskEndDate = secondTask.getDate();
-
-        // Check if the tasks have at least a 2 day gap
-        if (Math.abs(firstTask.getDate() - secondTask.getDate()) > 1) {
-            return false;
-        }
-
-        // Calculate the end times of both tasks
-        double firstTaskEndTime = firstTask.getStartTime() + firstTask.getDuration();
-        if (firstTaskEndTime > 23.75) {
-            firstTaskEndTime -= 24.0;
-            firstTaskEndDate += 1;
-        }
-        double secondTaskEndTime = secondTask.getStartTime() + secondTask.getDuration();
-        if (secondTaskEndTime > 23.75) {
-            secondTaskEndTime -= 24.0;
-            secondTaskEndDate += 1;
-        }
-    
-        // Check if date and start time of both tasks match
-        if (firstTask.getDate() == secondTask.getDate() && firstTask.getStartTime() == secondTask.getStartTime()) {
-            return true;
-        }
-        
-        // Check if tasks overlap on the same date
-        if (firstTask.getDate() == firstTaskEndDate && secondTask.getDate() == secondTaskEndDate && firstTask.getDate() == secondTask.getDate() && ((firstTask.getStartTime() < secondTask.getStartTime() && secondTask.getStartTime() < firstTaskEndTime)
-        	|| (secondTask.getStartTime() < firstTask.getStartTime() && firstTask.getStartTime() < secondTaskEndTime))) {
-        	return true;
-        }
-        
-        // Check if both tasks start on the same date and either one includes two dates where times overlap
-        if (firstTask.getDate() == secondTask.getDate() && ((firstTaskEndDate > secondTaskEndDate && firstTaskEndTime < secondTaskEndTime) || (secondTaskEndDate > firstTaskEndDate && secondTaskEndTime < firstTaskEndTime))) {
-        	return true;
-        }
-        
-        // Check if both tasks end on the same date and either one includes two dates where times overlap
-        if (firstTaskEndDate == secondTaskEndDate && ((firstTask.getDate() < secondTask.getDate() && firstTaskEndTime > secondTask.getStartTime()) || (secondTask.getDate() < firstTask.getDate() && secondTaskEndTime > firstTask.getStartTime()))) {
-            return true;
-        }
-        
-        // Check if both tasks include 2 dates that both match
-        if (firstTask.getDate() != firstTaskEndDate && secondTask.getDate() != secondTaskEndDate && firstTask.getDate() == secondTask.getDate() && firstTaskEndDate == secondTaskEndDate) {
-        	return true;
-        }
-    
-        return false;
-    }
-
-    /** Checks if given date is valid on the calendar.
-        @param  date The date to be checked. 
-        @return  True if the date is valid, false otherwise. */
-        private boolean isValidDate(int date) {
-            String dateString = Integer.toString(date);
-            if (dateString.length() != 8) {
-                return false;
-            }
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-            dateFormat.setLenient(false);
-            try {
-                dateFormat.parse(dateString);
-                return true;
-            } catch (ParseException e) {
-                return false;
-            }
-        }
 }

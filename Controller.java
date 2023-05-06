@@ -1,7 +1,5 @@
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
@@ -12,6 +10,7 @@ public class Controller {
     private Model model;
     private Viewer viewer;
     private Scanner keyboard;
+    private Calendar calendar;
 
     /** Type of tasks */
     enum Type {
@@ -32,6 +31,7 @@ public class Controller {
         this.model = model;
         this.viewer = viewer;
         this.keyboard = new Scanner(System.in);
+        this.calendar = new Calendar();
     }
 
     /** Displays the menu selection for all user input. */
@@ -166,7 +166,7 @@ public class Controller {
                     return;
                 } else {
                     date = Integer.parseInt(input);
-                    if (isValidDate(date)) {
+                    if (calendar.isValidDate(date)) {
                         break;
                     } else {
                         System.out.println("Invalid date input");
@@ -192,7 +192,7 @@ public class Controller {
                             return;
                         } else {
                             endDate = Integer.parseInt(input);
-                            if (isValidDate(endDate) && date < endDate) {
+                            if (calendar.isValidDate(endDate) && date < endDate) {
                                 break;
                             } else {
                                 System.out.println("Invalid end date input");
@@ -384,7 +384,7 @@ public class Controller {
                         break;
                     } else {
                         date = Integer.parseInt(input);
-                        if (isValidDate(date)) {
+                        if (calendar.isValidDate(date)) {
                             break;
                         } else {
                             System.out.println("Invalid date input");
@@ -419,7 +419,7 @@ public class Controller {
                                 break;
                             } else {
                                 endDate = Integer.parseInt(input);
-                                if (isValidDate(endDate) && date < endDate) {
+                                if (calendar.isValidDate(endDate) && date < endDate) {
                                     break;
                                 } else {
                                     System.out.println("Invalid end date input");
@@ -552,7 +552,7 @@ public class Controller {
                             return;
                         }
                         date = Integer.parseInt(input);
-                        if (isValidDate(date)) {
+                        if (calendar.isValidDate(date)) {
                             List<Task> schedule = model.getDailySchedule(date);
                             model.writeScheduleToFile(schedule, fileName);
                             return;
@@ -570,7 +570,7 @@ public class Controller {
                             return;
                         }
                         date = Integer.parseInt(input);
-                        if (isValidDate(date)) {
+                        if (calendar.isValidDate(date)) {
                             List<Task> schedule = model.getWeeklySchedule(date);
                             model.writeScheduleToFile(schedule, fileName);
                             return;
@@ -588,7 +588,7 @@ public class Controller {
                             return;
                         }
                         date = Integer.parseInt(input);
-                        if (isValidDate(date)) {
+                        if (calendar.isValidDate(date)) {
                             List<Task> schedule = model.getMonthlySchedule(date);
                             model.writeScheduleToFile(schedule, fileName);
                             return;
@@ -654,7 +654,7 @@ public class Controller {
                             return;
                         }
                         date = Integer.parseInt(input);
-                        if (isValidDate(date)) {
+                        if (calendar.isValidDate(date)) {
                             List<Task> schedule = model.getDailySchedule(date);
                             viewer.displaySchedule(schedule);
                             return;
@@ -672,7 +672,7 @@ public class Controller {
                             return;
                         }
                         date = Integer.parseInt(input);
-                        if (isValidDate(date)) {
+                        if (calendar.isValidDate(date)) {
                             List<Task> schedule = model.getWeeklySchedule(date);
                             viewer.displaySchedule(schedule);
                             return;
@@ -690,7 +690,7 @@ public class Controller {
                             return;
                         }
                         date = Integer.parseInt(input);
-                        if (isValidDate(date)) {
+                        if (calendar.isValidDate(date)) {
                             List<Task> schedule = model.getMonthlySchedule(date);
                             viewer.displaySchedule(schedule);
                             return;
@@ -717,23 +717,5 @@ public class Controller {
         System.out.println("Exiting");
         keyboard.close();
         System.exit(1);
-    }
-
-    /** Checks if given date is valid on the calendar.
-        @param  date The date to be checked. 
-        @return  True if the date is valid, false otherwise. */
-    private boolean isValidDate(int date) {
-        String dateString = Integer.toString(date);
-        if (dateString.length() != 8) {
-            return false;
-        }
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-        dateFormat.setLenient(false);
-        try {
-            dateFormat.parse(dateString);
-            return true;
-        } catch (ParseException e) {
-            return false;
-        }
     }
 }
