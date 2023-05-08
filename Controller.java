@@ -11,6 +11,7 @@ public class Controller {
     private Viewer viewer;
     private Scanner keyboard;
     private Calendar calendar;
+    private FileIO fileIO;
 
     /** Type of tasks */
     enum Type {
@@ -32,6 +33,7 @@ public class Controller {
         this.viewer = viewer;
         this.keyboard = new Scanner(System.in);
         this.calendar = new Calendar();
+        this.fileIO = new FileIO(model, calendar);
     }
 
     /** Displays the menu selection for all user input. */
@@ -491,7 +493,7 @@ public class Controller {
         }
         File file = new File(fileName);
         if (file.exists()) {
-            model.readScheduleFromFile(fileName);
+            fileIO.readScheduleFromFile(fileName);
         } else {
             System.out.println("------------------------------");
             System.out.println("Error: File does not exist");
@@ -554,7 +556,7 @@ public class Controller {
                         date = Integer.parseInt(input);
                         if (calendar.isValidDate(date)) {
                             List<Task> schedule = model.getDailySchedule(date);
-                            model.writeScheduleToFile(schedule, fileName);
+                            fileIO.writeScheduleToFile(schedule, fileName);
                             return;
                         } else {
                             System.out.println("Invalid date");
@@ -572,7 +574,7 @@ public class Controller {
                         date = Integer.parseInt(input);
                         if (calendar.isValidDate(date)) {
                             List<Task> schedule = model.getWeeklySchedule(date);
-                            model.writeScheduleToFile(schedule, fileName);
+                            fileIO.writeScheduleToFile(schedule, fileName);
                             return;
                         } else {
                             System.out.println("Invalid date");
@@ -590,7 +592,7 @@ public class Controller {
                         date = Integer.parseInt(input);
                         if (calendar.isValidDate(date)) {
                             List<Task> schedule = model.getMonthlySchedule(date);
-                            model.writeScheduleToFile(schedule, fileName);
+                            fileIO.writeScheduleToFile(schedule, fileName);
                             return;
                         } else {
                             System.out.println("Invalid date");
@@ -599,7 +601,7 @@ public class Controller {
                     }
                     case 4 -> {
                         List<Task> schedule = model.getFullSchedule();
-                        model.writeScheduleToFile(schedule, fileName);
+                        fileIO.writeScheduleToFile(schedule, fileName);
                         return;
                     }
                 }
