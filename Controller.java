@@ -36,7 +36,8 @@ public class Controller {
         this.fileIO = new FileIO(model, calendar);
     }
 
-    /** Displays the menu selection for all user input. */
+    // Offers user a menu selection and takes in user input 
+    // Also validates user input is in proper format
     public void menuSelection() {
 
         int action;
@@ -68,7 +69,12 @@ public class Controller {
         }
     }
 
-    /** Action for creating a task. */
+    // Activates after receiving case 1, creating task 
+    // Creating a task goes through 5 phases each requiring 
+    // user input name, type, time, duration, and date inputs 
+    // At any point the current action may be cancelled 
+    // Input is also validated 
+
     public void creatingTask() {
         Set<String> names = model.getNames();
         String name;
@@ -235,7 +241,9 @@ public class Controller {
         }
     }
 
-    /** Action for viewing a task. */
+    // Activates after receiving case 2, view task
+    // Displays all tasks previosly created
+    // User may search for a partiuclar task
     public void viewingTask() {
         String name;
         System.out.println("Viewing a task");
@@ -256,7 +264,10 @@ public class Controller {
         }
     }
 
-    /** Action for editing a task. */
+    // Activates after receiving case 3, editing task 
+    // User is prompted with part of a task to edit
+    // Inputs are validated
+    // User may cancel at any time
     public void editingTask() {
         Set<String> names = model.getNames();
         String name;
@@ -466,7 +477,9 @@ public class Controller {
         }
     }
 
-    /** Action for deleting a task. */
+    
+    // Activates after receiving case 4, deleting task
+    // User may cancel at any time
     public void deletingTask() {
         String name;
         System.out.println("Deleting a task");
@@ -480,7 +493,8 @@ public class Controller {
         model.deleteTask(name);
     }
 
-    /** Action for reading a schedule from a given file. */
+    // Activates after receiving case 5, reading schedule from file
+    // User will import file to schedule
     public void readingScheduleFromFile() throws IOException {
         String fileName;
         System.out.println("Reading a schedule from a file");
@@ -500,7 +514,8 @@ public class Controller {
         }
     }
 
-    /** Action for writing a day, week, month, or full schedule to a file. */
+    // Activates after receiving case 6, writing schedule to file
+    // Writes input to file
     public void writingScheduleToFile() {
         String input;
         int timePeriod;
@@ -612,7 +627,8 @@ public class Controller {
         }
     }
 
-    /** Action for viewing a day, week, month, or full schedule. */
+    // Activates after receiving case 7, view schedule
+    // User can see their lists of tasks
     public void viewingSchedule() {
         String input;
         int timePeriod;
@@ -714,7 +730,8 @@ public class Controller {
         }
     }
 
-    /** Action for exiting a session. */
+    // Activates after receiving case 8, exit
+    // Ends program
     public void exiting() {
         System.out.println("Exiting");
         keyboard.close();
