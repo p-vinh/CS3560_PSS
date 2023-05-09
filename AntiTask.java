@@ -6,7 +6,8 @@ public class AntiTask extends Task {
         super(name, type, startTime, duration, date);
     }
 
-    /** Displays task information. */
+    // anti-task is used to cancel out one repetition of a recurring task 
+    // recurring task and anti task must have same start time and duration 
     @Override
     public void print() {
         System.out.println("Name: " + super.getName());
