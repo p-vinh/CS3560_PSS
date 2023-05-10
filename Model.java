@@ -444,9 +444,9 @@ public class Model {
                                 time = potentialOverlappingTask.getStartTime();
                                 duration = potentialOverlappingTask.getDuration();
                                 antiTaskFound = false;
-                                for (int j = i + 1; j < tasks.size(); j++) {
-                                    if (tasks.get(j).getClass() == AntiTask.class) {
-                                        Task antiTask = tasks.get(j);
+                                for (int j = i + 1; j < moveTasksList.size(); j++) {
+                                    if (moveTasksList.get(j).getClass() == AntiTask.class) {
+                                        Task antiTask = moveTasksList.get(j);
                                         if (antiTask.getDate() == day && antiTask.getStartTime() == time && antiTask.getDuration() == duration) {
                                             antiTaskFound = true;
                                             break;
