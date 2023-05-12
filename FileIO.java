@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+/** Class for managing read and write to file operations */
 public class FileIO {
 
     private Model model;

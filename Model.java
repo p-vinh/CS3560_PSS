@@ -401,6 +401,72 @@ public class Model {
                                 }
                             }
                         }
+                        for (int i = 0; i < moveTasksList.size(); i++) {
+                            Task potentialOverlappingTask = moveTasksList.get(i);
+                            if (calendar.checkOverlap(new RecurringTask(newRecurringTask.getName(), newRecurringTask.getType(), newRecurringTask.getStartTime(), newRecurringTask.getDuration(), date, newRecurringTask.getEndDate(), newRecurringTask.getFrequency()), potentialOverlappingTask) && potentialOverlappingTask.getClass() == TransientTask.class) {
+                                int day = newRecurringTask.getDate();
+                                double time = newRecurringTask.getStartTime();
+                                double duration = newRecurringTask.getDuration();
+                                boolean antiTaskFound = false;
+                                for (int j = 0; j < antiTasksList.size(); j++) {
+                                    if (antiTasksList.get(j).getDate() == day && antiTasksList.get(j).getStartTime() == time && antiTasksList.get(j).getDuration() == duration) {
+                                        antiTaskFound = true;
+                                        break;
+                                    }
+                                }
+                                if (!antiTaskFound) {
+                                    System.out.println("------------------------------");
+                                    System.out.println("Error: Failed to update task due to an overlapping conflict with task: \"" + potentialOverlappingTask.getName() + "\"");
+                                    tasks = new ArrayList<Task>(); // If update fails, restore tasks and names
+                                    names = new HashSet<String>();
+                                    for (Task task : backup) {
+                                        tasks.add(task);
+                                        names.add(task.getName());
+                                    }
+                                    isUpdating = false;
+                                    return false;
+                                }
+                            } else if (calendar.checkOverlap(new RecurringTask(newRecurringTask.getName(), newRecurringTask.getType(), newRecurringTask.getStartTime(), newRecurringTask.getDuration(), date, newRecurringTask.getEndDate(), newRecurringTask.getFrequency()), potentialOverlappingTask) && potentialOverlappingTask.getClass() == RecurringTask.class) {
+                                int day = newRecurringTask.getDate();
+                                double time = newRecurringTask.getStartTime();
+                                double duration = newRecurringTask.getDuration();
+                                boolean antiTaskFound = false;
+                                for (int j = 0; j < antiTasksList.size(); j++) {
+                                    if (antiTasksList.get(j).getDate() == day && antiTasksList.get(j).getStartTime() == time && antiTasksList.get(j).getDuration() == duration) {
+                                        antiTaskFound = true;
+                                        break;
+                                    }
+                                }
+                                if (antiTaskFound) {
+                                   continue;
+                                }
+                                day = potentialOverlappingTask.getDate();
+                                time = potentialOverlappingTask.getStartTime();
+                                duration = potentialOverlappingTask.getDuration();
+                                antiTaskFound = false;
+                                for (int j = i + 1; j < moveTasksList.size(); j++) {
+                                    if (moveTasksList.get(j).getClass() == AntiTask.class) {
+                                        Task antiTask = moveTasksList.get(j);
+                                        if (antiTask.getDate() == day && antiTask.getStartTime() == time && antiTask.getDuration() == duration) {
+                                            antiTaskFound = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!antiTaskFound) {
+                                    System.out.println("------------------------------");
+                                    System.out.println("Error: Failed to update task due to an overlapping conflict with task: \"" + potentialOverlappingTask.getName() + "\"");
+                                    tasks = new ArrayList<Task>(); // If update fails, restore tasks and names
+                                    names = new HashSet<String>();
+                                    for (Task task : backup) {
+                                        tasks.add(task);
+                                        names.add(task.getName());
+                                    }
+                                    isUpdating = false;
+                                    return false;
+                                }
+                            }
+                        }
                         LocalDate currentDate = LocalDate.parse(String.valueOf(date), DateTimeFormatter.BASIC_ISO_DATE);
                         LocalDate nextDate = currentDate.plusDays(newRecurringTask.getFrequency());
                         date = Integer.parseInt(nextDate.format(DateTimeFormatter.BASIC_ISO_DATE));
@@ -575,6 +641,8 @@ public class Model {
         return tasks;
     }
 
+    /** Setter method for list of tasks.
+        @param  tasks List of tasks. */
     public void setTasks(List<Task> tasks) {
         this.tasks = tasks;
     }
@@ -585,6 +653,8 @@ public class Model {
         return names;
     }
 
+    /** Setter method for set of task names.
+        @param  names Set of task names. */
     public void setNames(Set<String> names) {
         this.names = names;
     }
@@ -616,10 +686,14 @@ public class Model {
         return scheduler.fullSchedule(tasks);
     }
 
+    /** Setter method for isReading state.
+        @param  state The isReading state. */
     public void setIsReading(boolean state) {
         isReading = state;
     }
 
+    /** Getter method for isReading state.
+        @return  isReading state. */
     public boolean getIsReading() {
         return isReading;
     }
